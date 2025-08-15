@@ -42,6 +42,10 @@ import homeassistant.util.dt as dt_util
 
 _LOGGER = logging.getLogger(__name__)
 
+LEGACY_FIELDS = {
+    CONF_VALUE_TEMPLATE: CONF_STATE,
+}
+
 CONF_ALBUM_ART_TEMPLATE = "album_art_template"
 CONF_ALBUM_TEMPLATE = "album_template"
 CONF_ARTIST_TEMPLATE = "artist_template"
@@ -141,7 +145,8 @@ async def async_setup_platform(
         None,
         async_add_entities,
         discovery_info,
-        {},
+        LEGACY_FIELDS,
+        CONF_MEDIAPLAYER,
     )
 
 
