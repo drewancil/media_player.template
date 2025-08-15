@@ -29,6 +29,7 @@ from homeassistant.const import (
     CONF_DEVICE_CLASS,
     CONF_ENTITY_PICTURE_TEMPLATE,
     CONF_ICON_TEMPLATE,
+    CONF_STATE,
     CONF_UNIQUE_ID,
     CONF_VALUE_TEMPLATE,
 )
@@ -162,7 +163,7 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
         name = self._attr_name
 
         self._attr_device_class = config.get(CONF_DEVICE_CLASS)
-        self._template = config[CONF_VALUE_TEMPLATE]
+        self._template = config[CONF_STATE]
 
         self._attr_supported_features = MediaPlayerEntityFeature(0)
         for action_id, supported_feature in (
