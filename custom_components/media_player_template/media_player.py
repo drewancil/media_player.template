@@ -502,7 +502,11 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
             self._attr_is_volume_muted = mute
             self.async_write_ha_state()
         if script := self._action_scripts.get(CONF_MUTE_ACTION):
-            await self.async_run_script(script, context=self._context)
+            await self.async_run_script(
+                script,
+                run_variables={"is_muted": mute},
+                context=self._context,
+            )
 
     async def async_media_play(self):
         """Fire the play action."""
