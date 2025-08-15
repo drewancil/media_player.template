@@ -376,9 +376,10 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
                 self._attr_state = MediaPlayerState(result)
         except ValueError:
             _LOGGER.error(
-                "Template entity %s received an invalid state %s",
+                "Template entity %s received an invalid state %s, expected: true, false, %s",
                 self.entity_id,
                 result,
+                ", ".join(MediaPlayerState),
             )
             self._attr_state = None
 
@@ -392,9 +393,10 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
             self._attr_source = result
         else:
             _LOGGER.warning(
-                "Template entity %s received an invalid source %s",
+                "Template entity %s received an invalid source %s, expected: %s",
                 self.entity_id,
                 result,
+                ", ".join(self._attr_source_list),
             )
 
     @callback
@@ -407,9 +409,10 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
             self._attr_sound_mode = result
         else:
             _LOGGER.warning(
-                "Template entity %s received an invalid source %s",
+                "Template entity %s received an invalid media sound mode %s, expected: %s",
                 self.entity_id,
                 result,
+                ", ".join(self._attr_sound_mode_list),
             )
 
     @callback
@@ -423,9 +426,10 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
             self._attr_media_content_type = MediaType(result)
         except ValueError:
             _LOGGER.error(
-                "Template entity %s received an invalid media content type %s",
+                "Template entity %s received an invalid media content type %s, expected: %s",
                 self.entity_id,
                 result,
+                ", ".join(MediaType),
             )
             self._attr_media_content_type = None
 
