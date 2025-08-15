@@ -226,8 +226,6 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
             CONF_MEDIA_IMAGE_URL_REMOTELY_ACCESSIBLE, False
         )
 
-        self._last_update = None
-
     async def async_added_to_hass(self):
         """Register callbacks."""
         self.add_template_attribute(
