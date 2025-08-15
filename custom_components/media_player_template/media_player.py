@@ -233,8 +233,8 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
             CONF_MEDIA_IMAGE_URL_REMOTELY_ACCESSIBLE, False
         )
 
-    async def async_added_to_hass(self):
-        """Register callbacks."""
+    def _async_setup_templates(self):
+        """Set up templates."""
         self.add_template_attribute(
             "_attr_state",
             self._template,
@@ -256,7 +256,8 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
             self.add_template_attribute(
                 "_attr_media_title",
                 self._title_template,
-                cv.string,
+                None,
+                self._update_title,
                 none_on_template_error=True,
             )
 
@@ -264,7 +265,8 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
             self.add_template_attribute(
                 "_attr_media_artist",
                 self._artist_template,
-                cv.string,
+                None,
+                self._update_media_artist,
                 none_on_template_error=True,
             )
 
@@ -272,7 +274,8 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
             self.add_template_attribute(
                 "_attr_media_album_name",
                 self._album_template,
-                cv.string,
+                None,
+                self._update_media_album_name,
                 none_on_template_error=True,
             )
 
@@ -280,7 +283,8 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
             self.add_template_attribute(
                 "_attr_volume_level",
                 self._current_volume_template,
-                cv.positive_float,
+                None,
+                self._update_volume_level,
                 none_on_template_error=True,
             )
 
@@ -288,7 +292,9 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
             self.add_template_attribute(
                 "_attr_is_volume_muted",
                 self._current_is_muted_template,
-                cv.boolean,
+                None,
+                self._update_is_volume_muted,
+                none_on_template_error=True,
             )
 
         if self._media_content_type_template is not None:
@@ -303,49 +309,56 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
             self.add_template_attribute(
                 "_attr_media_image_url",
                 self._media_image_url_template,
-                cv.string,
+                None,
+                self._update_media_image_url,
                 none_on_template_error=True,
             )
         if self._media_episode_template is not None:
             self.add_template_attribute(
                 "_attr_media_episode",
                 self._media_episode_template,
-                cv.string,
+                None,
+                self._update_media_episode,
                 none_on_template_error=True,
             )
         if self._media_season_template is not None:
             self.add_template_attribute(
                 "_attr_media_season",
                 self._media_season_template,
-                cv.string,
+                None,
+                self._update_media_season,
                 none_on_template_error=True,
             )
         if self._media_series_title_template is not None:
             self.add_template_attribute(
                 "_attr_media_series_title",
                 self._media_series_title_template,
-                cv.string,
+                None,
+                self._update_media_series_title,
                 none_on_template_error=True,
             )
         if self._media_album_artist_template is not None:
             self.add_template_attribute(
                 "_attr_media_album_artist",
                 self._media_album_artist_template,
-                cv.string,
+                None,
+                self._update_media_album_artist,
                 none_on_template_error=True,
             )
         if self._current_position_template is not None:
             self.add_template_attribute(
                 "_attr_media_position",
                 self._current_position_template,
-                cv.positive_int,
+                None,
+                self._update_media_position,
                 none_on_template_error=True,
             )
         if self._media_duration_template is not None:
             self.add_template_attribute(
                 "_attr_media_duration",
                 self._media_duration_template,
-                cv.positive_int,
+                None,
+                self._update_media_duration,
                 none_on_template_error=True,
             )
         if self._current_sound_mode_template is not None:
@@ -356,17 +369,16 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
                 self._update_sound_mode,
                 none_on_template_error=True,
             )
-
-        await super().async_added_to_hass()
+        super()._async_setup_templates()
 
     @callback
     def _update_state(self, result):
         super()._update_state(result)
-        if isinstance(result, TemplateError):
+        if isinstance(result, TemplateError) or result is None:
             self._attr_state = None
             return
 
-        result = cv.string(result).lower()
+        result = vol.Coerce(str)(result).lower()
         try:
             if result == "true":
                 self._attr_state = MediaPlayerState.ON
@@ -385,7 +397,7 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
 
     @callback
     def _update_source(self, result):
-        if isinstance(result, TemplateError):
+        if isinstance(result, TemplateError) or result is None:
             self._attr_source = None
             return
 
@@ -393,35 +405,76 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
             self._attr_source = result
         else:
             _LOGGER.warning(
-                "Template entity %s received an invalid source %s, expected: %s",
-                self.entity_id,
+                "Received invalid source: %s for entity %s, expected: %s",
                 result,
+                self.entity_id,
                 ", ".join(self._attr_source_list),
             )
 
     @callback
-    def _update_sound_mode(self, result):
-        if isinstance(result, TemplateError):
-            self._attr_sound_mode = None
+    def _update_title(self, result):
+        if isinstance(result, TemplateError) or result is None:
+            self._attr_media_title = None
             return
 
-        if self._attr_sound_mode_list and result in self._attr_sound_mode_list:
-            self._attr_sound_mode = result
-        else:
-            _LOGGER.warning(
-                "Template entity %s received an invalid media sound mode %s, expected: %s",
-                self.entity_id,
+        self._attr_media_title = vol.Coerce(str)(result)
+
+    @callback
+    def _update_media_artist(self, result):
+        if isinstance(result, TemplateError) or result is None:
+            self._attr_media_artist = None
+            return
+
+        self._attr_media_artist = vol.Coerce(str)(result)
+
+    @callback
+    def _update_media_album_name(self, result):
+        if isinstance(result, TemplateError) or result is None:
+            self._attr_media_album_name = None
+            return
+
+        self._attr_media_album_name = vol.Coerce(str)(result)
+
+    @callback
+    def _update_volume_level(self, result):
+        if isinstance(result, TemplateError) or result is None:
+            self._attr_volume_level = None
+            return
+
+        try:
+            level = vol.All(vol.Coerce(float), vol.Range(min=0))(result)
+            self._attr_volume_level = level
+        except vol.Invalid:
+            _LOGGER.error(
+                "Received invalid volume level: %s for entity %s, expected value above 0",
                 result,
-                ", ".join(self._attr_sound_mode_list),
+                self.entity_id,
             )
+            self._attr_volume_level = None
+
+    @callback
+    def _update_is_volume_muted(self, result):
+        if isinstance(result, TemplateError) or result is None:
+            self._attr_is_volume_muted = None
+            return
+
+        try:
+            self._attr_is_volume_muted = cv.boolean(result)
+        except vol.Invalid:
+            _LOGGER.error(
+                "Received invalid mute: %s for entity %s, expected: true or false",
+                result,
+                self.entity_id,
+            )
+            self._attr_is_volume_muted = None
 
     @callback
     def _update_media_content_type(self, result):
-        if isinstance(result, TemplateError):
+        if isinstance(result, TemplateError) or result is None:
             self._attr_media_content_type = None
             return
 
-        result = cv.string(result).lower()
+        result = vol.Coerce(str)(result).lower()
         try:
             self._attr_media_content_type = MediaType(result)
         except ValueError:
@@ -434,8 +487,48 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
             self._attr_media_content_type = None
 
     @callback
+    def _update_media_image_url(self, result):
+        if isinstance(result, TemplateError) or result is None:
+            self._attr_media_image_url = None
+            return
+
+        self._attr_media_image_url = vol.Coerce(str)(result)
+
+    @callback
+    def _update_media_episode(self, result):
+        if isinstance(result, TemplateError) or result is None:
+            self._attr_media_episode = None
+            return
+
+        self._attr_media_episode = vol.Coerce(str)(result)
+
+    @callback
+    def _update_media_season(self, result):
+        if isinstance(result, TemplateError) or result is None:
+            self._attr_media_season = None
+            return
+
+        self._attr_media_season = vol.Coerce(str)(result)
+
+    @callback
+    def _update_media_series_title(self, result):
+        if isinstance(result, TemplateError) or result is None:
+            self._attr_media_series_title = None
+            return
+
+        self._attr_media_series_title = vol.Coerce(str)(result)
+
+    @callback
+    def _update_media_album_artist(self, result):
+        if isinstance(result, TemplateError) or result is None:
+            self._attr_media_album_artist = None
+            return
+
+        self._attr_media_album_artist = vol.Coerce(str)(result)
+
+    @callback
     def _update_media_position(self, result):
-        if isinstance(result, TemplateError):
+        if isinstance(result, TemplateError) or result is None:
             self._attr_media_position_updated_at = None
             self._attr_media_position = None
             return
@@ -475,6 +568,22 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
                 result,
             )
             self._attr_media_duration = None
+
+    @callback
+    def _update_sound_mode(self, result):
+        if isinstance(result, TemplateError) or result is None:
+            self._attr_sound_mode = None
+            return
+
+        if self._attr_sound_mode_list and result in self._attr_sound_mode_list:
+            self._attr_sound_mode = result
+        else:
+            _LOGGER.warning(
+                "Received invalid sound mode: %s for entity %s, expected: %s",
+                result,
+                self.entity_id,
+                ", ".join(self._attr_sound_mode_list),
+            )
 
     async def async_turn_on(self):
         """Fire the on action."""
