@@ -79,7 +79,7 @@ CONF_VOLUME_UP_ACTION = "volume_up"
 MEDIA_PLAYER_SCHEMA = vol.Schema(
     {
         vol.Optional(ATTR_ENTITY_ID): cv.entity_ids,
-        vol.Optional(ATTR_FRIENDLY_NAME): cv.string,
+        vol.Optional(ATTR_FRIENDLY_NAME): cv.template,
         vol.Optional(CONF_ALBUM_ART_TEMPLATE): cv.template,
         vol.Optional(CONF_ALBUM_TEMPLATE): cv.template,
         vol.Optional(CONF_ARTIST_TEMPLATE): cv.template,
@@ -140,6 +140,7 @@ async def async_setup_platform(
         None,
         async_add_entities,
         discovery_info,
+        {},
     )
 
 
