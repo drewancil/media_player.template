@@ -192,24 +192,24 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
                     self._attr_supported_features |= supported_feature
 
         # Source and Source List
-        for action_id, action_config in config.get(CONF_INPUTS, {}).items():
-            if (action_config := config.get(action_id)) is not None:
-                self.add_script(f"input_{action_id}", action_config, name, DOMAIN)
-                self._attr_supported_features |= MediaPlayerEntityFeature.SELECT_SOURCE
-                if self._attr_source_list is None:
-                    self._attr_source_list = []
-                self._attr_source_list.append(action_id)
+        for input_id, input_config in config.get(CONF_INPUTS, {}).items():
+            self.add_script(f"input_{input_id}", input_config, name, DOMAIN)
+            self._attr_supported_features |= MediaPlayerEntityFeature.SELECT_SOURCE
+            if self._attr_source_list is None:
+                self._attr_source_list = []
+            self._attr_source_list.append(input_id)
 
         # Sound Mode and Sound Mode List
-        for action_id, action_config in config.get(CONF_SOUND_MODES, {}).items():
-            if (action_config := config.get(action_id)) is not None:
-                self.add_script(f"sound_mode_{action_id}", action_config, name, DOMAIN)
-                self._attr_supported_features |= (
-                    MediaPlayerEntityFeature.SELECT_SOUND_MODE
-                )
-                if self._attr_sound_mode_list is None:
-                    self._attr_sound_mode_list = []
-                self._attr_sound_mode_list.append(action_id)
+        for sound_mode_id, sound_mode_config in config.get(
+            CONF_SOUND_MODES, {}
+        ).items():
+            self.add_script(
+                f"sound_mode_{sound_mode_id}", sound_mode_config, name, DOMAIN
+            )
+            self._attr_supported_features |= MediaPlayerEntityFeature.SELECT_SOUND_MODE
+            if self._attr_sound_mode_list is None:
+                self._attr_sound_mode_list = []
+            self._attr_sound_mode_list.append(sound_mode_id)
 
         self._current_source_template = config.get(CONF_CURRENT_SOURCE_TEMPLATE)
         self._title_template = config.get(CONF_TITLE_TEMPLATE)
