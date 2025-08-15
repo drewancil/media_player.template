@@ -535,7 +535,9 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
             self._attr_volume_level = volume
             self.async_write_ha_state()
         if script := self._action_scripts.get(CONF_SET_VOLUME_ACTION):
-            await self.async_run_script(script, context=self._context)
+            await self.async_run_script(
+                script, {"volume": volume}, context=self._context
+            )
 
     async def async_play_media(self, media_type, media_id, **kwargs):
         """Play media."""
