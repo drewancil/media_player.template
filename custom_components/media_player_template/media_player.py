@@ -536,7 +536,9 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
             self.async_write_ha_state()
         if script := self._action_scripts.get(CONF_SET_VOLUME_ACTION):
             await self.async_run_script(
-                script, {"volume": volume}, context=self._context
+                script,
+                run_variables={"volume": volume},
+                context=self._context,
             )
 
     async def async_play_media(self, media_type, media_id, **kwargs):
@@ -544,7 +546,7 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
         if script := self._action_scripts.get(CONF_PLAY_MEDIA_ACTION):
             await self.async_run_script(
                 script,
-                {"media_type": media_type, "media_id": media_id},
+                run_variables={"media_type": media_type, "media_id": media_id},
                 context=self._context,
             )
 
@@ -552,7 +554,9 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
         """Send seek command."""
         if script := self._action_scripts.get(CONF_SEEK_ACTION):
             await self.async_run_script(
-                script, {"position": position}, context=self._context
+                script,
+                run_variables={"position": position},
+                context=self._context,
             )
 
     async def async_select_source(self, source):
