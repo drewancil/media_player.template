@@ -165,8 +165,6 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
         """Initialize the Template Media player."""
         super().__init__(hass, config, unique_id)
 
-        name = self._attr_name
-
         self._attr_device_class = config.get(CONF_DEVICE_CLASS)
         self._template = config[CONF_STATE]
 
@@ -187,29 +185,19 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
             (CONF_SEEK_ACTION, MediaPlayerEntityFeature.SEEK),
         ):
             if (action_config := config.get(action_id)) is not None:
-                self.add_script(action_id, action_config, name, DOMAIN)
+                self.add_script(action_id, action_config, self._attr_name, DOMAIN)
                 if supported_feature is not None:
                     self._attr_supported_features |= supported_feature
 
         # Source and Source List
-        for input_id, input_config in config.get(CONF_INPUTS, {}).items():
-            self.add_script(f"input_{input_id}", input_config, name, DOMAIN)
-            self._attr_supported_features |= MediaPlayerEntityFeature.SELECT_SOURCE
-            if self._attr_source_list is None:
-                self._attr_source_list = []
-            self._attr_source_list.append(input_id)
+        for source, source_config in config.get(CONF_INPUTS, {}).items():
+            self._add_source(source, source_config)
 
         # Sound Mode and Sound Mode List
-        for sound_mode_id, sound_mode_config in config.get(
+        for sound_mode, sound_mode_config in config.get(
             CONF_SOUND_MODES, {}
         ).items():
-            self.add_script(
-                f"sound_mode_{sound_mode_id}", sound_mode_config, name, DOMAIN
-            )
-            self._attr_supported_features |= MediaPlayerEntityFeature.SELECT_SOUND_MODE
-            if self._attr_sound_mode_list is None:
-                self._attr_sound_mode_list = []
-            self._attr_sound_mode_list.append(sound_mode_id)
+            self._add_sound_mode(sound_mode, sound_mode_config)
 
         self._current_source_template = config.get(CONF_CURRENT_SOURCE_TEMPLATE)
         self._title_template = config.get(CONF_TITLE_TEMPLATE)
@@ -371,6 +359,30 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
             )
         super()._async_setup_templates()
 
+    def _add_source(self, source: str, config: ConfigType = {}) -> None:
+        if config:
+            self.add_script(f"input_{source}", config, self._attr_name, DOMAIN)
+
+        if not MediaPlayerEntityFeature.SELECT_SOURCE & self._attr_supported_features:
+            self._attr_supported_features |= MediaPlayerEntityFeature.SELECT_SOURCE
+        
+        if self._attr_source_list is None:
+            self._attr_source_list = []
+
+        self._attr_source_list.append(source)
+
+    def _add_sound_mode(self, sound_mode: str, config: ConfigType = {}) -> None:
+        if config:
+            self.add_script(f"sound_mode_{sound_mode}", config, self._attr_name, DOMAIN)
+
+        if not MediaPlayerEntityFeature.SELECT_SOUND_MODE & self._attr_supported_features:
+            self._attr_supported_features |= MediaPlayerEntityFeature.SELECT_SOUND_MODE
+        
+        if self._attr_sound_mode_list is None:
+            self._attr_sound_mode_list = []
+
+        self._attr_sound_mode_list.append(sound_mode)
+
     @callback
     def _update_state(self, result):
         super()._update_state(result)
@@ -401,15 +413,15 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
             self._attr_source = None
             return
 
-        if self._attr_source_list and result in self._attr_source_list:
-            self._attr_source = result
-        else:
-            _LOGGER.warning(
-                "Received invalid source: %s for entity %s, expected: %s",
+        if self._attr_source_list and result not in self._attr_source_list:
+            _LOGGER.debug(
+                "Received new source: %s for entity %s",
                 result,
-                self.entity_id,
-                ", ".join(self._attr_source_list),
+                self.entity_id
             )
+            self._add_source(result)
+
+        self._attr_source = result
 
     @callback
     def _update_title(self, result):
@@ -575,15 +587,15 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
             self._attr_sound_mode = None
             return
 
-        if self._attr_sound_mode_list and result in self._attr_sound_mode_list:
-            self._attr_sound_mode = result
-        else:
-            _LOGGER.warning(
-                "Received invalid sound mode: %s for entity %s, expected: %s",
+        if self._attr_sound_mode_list and result not in self._attr_sound_mode_list:
+            _LOGGER.debug(
+                "Received new sound mode: %s for entity %s",
                 result,
                 self.entity_id,
-                ", ".join(self._attr_sound_mode_list),
             )
+            self._add_sound_mode(result)
+
+        self._attr_sound_mode = result
 
     async def async_turn_on(self):
         """Fire the on action."""
