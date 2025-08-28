@@ -19,9 +19,9 @@ from homeassistant.components.media_player import (
 )
 from homeassistant.components.template import DOMAIN
 from homeassistant.components.template.helpers import async_setup_template_platform
-from homeassistant.components.template.template_entity import (
-    TEMPLATE_ENTITY_AVAILABILITY_SCHEMA_LEGACY,
-    TemplateEntity,
+from homeassistant.components.template.template_entity import TemplateEntity
+from homeassistant.components.template.schemas import (
+    TEMPLATE_ENTITY_ATTRIBUTES_SCHEMA_LEGACY,
 )
 from homeassistant.const import (
     ATTR_ENTITY_ID,
@@ -194,9 +194,7 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
             self._add_source(source, source_config)
 
         # Sound Mode and Sound Mode List
-        for sound_mode, sound_mode_config in config.get(
-            CONF_SOUND_MODES, {}
-        ).items():
+        for sound_mode, sound_mode_config in config.get(CONF_SOUND_MODES, {}).items():
             self._add_sound_mode(sound_mode, sound_mode_config)
 
         self._current_source_template = config.get(CONF_CURRENT_SOURCE_TEMPLATE)
@@ -365,7 +363,7 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
 
         if not MediaPlayerEntityFeature.SELECT_SOURCE & self._attr_supported_features:
             self._attr_supported_features |= MediaPlayerEntityFeature.SELECT_SOURCE
-        
+
         if self._attr_source_list is None:
             self._attr_source_list = []
 
@@ -375,9 +373,12 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
         if config:
             self.add_script(f"sound_mode_{sound_mode}", config, self._attr_name, DOMAIN)
 
-        if not MediaPlayerEntityFeature.SELECT_SOUND_MODE & self._attr_supported_features:
+        if (
+            not MediaPlayerEntityFeature.SELECT_SOUND_MODE
+            & self._attr_supported_features
+        ):
             self._attr_supported_features |= MediaPlayerEntityFeature.SELECT_SOUND_MODE
-        
+
         if self._attr_sound_mode_list is None:
             self._attr_sound_mode_list = []
 
@@ -415,9 +416,7 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
 
         if self._attr_source_list and result not in self._attr_source_list:
             _LOGGER.debug(
-                "Received new source: %s for entity %s",
-                result,
-                self.entity_id
+                "Received new source: %s for entity %s", result, self.entity_id
             )
             self._add_source(result)
 
