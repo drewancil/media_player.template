@@ -1,5 +1,4 @@
-"""
-Template for media-player
+"""Template for media-player
 https://github.com/Sennevds/media_player.template
 """
 
@@ -19,10 +18,10 @@ from homeassistant.components.media_player import (
 )
 from homeassistant.components.template import DOMAIN
 from homeassistant.components.template.helpers import async_setup_template_platform
-from homeassistant.components.template.template_entity import TemplateEntity
 from homeassistant.components.template.schemas import (
     TEMPLATE_ENTITY_AVAILABILITY_SCHEMA_LEGACY,
 )
+from homeassistant.components.template.template_entity import TemplateEntity
 from homeassistant.const import (
     ATTR_ENTITY_ID,
     ATTR_FRIENDLY_NAME,
@@ -357,8 +356,8 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
             )
         super()._async_setup_templates()
 
-    def _add_source(self, source: str, config: ConfigType = {}) -> None:
-        if config:
+    def _add_source(self, source: str, config: ConfigType | None = None) -> None:
+        if config is not None and config:
             self.add_script(f"input_{source}", config, self._attr_name, DOMAIN)
 
         if not MediaPlayerEntityFeature.SELECT_SOURCE & self._attr_supported_features:
@@ -369,8 +368,10 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
 
         self._attr_source_list.append(source)
 
-    def _add_sound_mode(self, sound_mode: str, config: ConfigType = {}) -> None:
-        if config:
+    def _add_sound_mode(
+        self, sound_mode: str, config: ConfigType | None = None
+    ) -> None:
+        if config is not None and config:
             self.add_script(f"sound_mode_{sound_mode}", config, self._attr_name, DOMAIN)
 
         if (
