@@ -21,7 +21,7 @@ from homeassistant.components.template import DOMAIN
 from homeassistant.components.template.helpers import async_setup_template_platform
 from homeassistant.components.template.template_entity import TemplateEntity
 from homeassistant.components.template.schemas import (
-    TEMPLATE_ENTITY_ATTRIBUTES_SCHEMA_LEGACY,
+    TEMPLATE_ENTITY_AVAILABILITY_SCHEMA_LEGACY,
 )
 from homeassistant.const import (
     ATTR_ENTITY_ID,
