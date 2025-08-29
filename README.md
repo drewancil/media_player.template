@@ -4,6 +4,7 @@ media_player template for Home Assistant
 
 [![GitHub Release][releases-shield]][releases]
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/hacs/integration)
+![hacs_installations](https://raw.githubusercontent.com/golles/ha-active-installation-badges/main/badges/media_player_template.svg)
 [![License][license-shield]](LICENSE.md)
 
 ![Project Maintenance][maintenance-shield]
@@ -130,6 +131,6 @@ media_player:
 [forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg?style=for-the-badge
 [forum]: https://community.home-assistant.io/t/media-player-template/203062
 [license-shield]: https://img.shields.io/github/license/sennevds/media_player.template.svg?style=for-the-badge
-[maintenance-shield]: https://img.shields.io/maintenance/yes/2021.svg?style=for-the-badge
+[maintenance-shield]: https://img.shields.io/maintenance/yes/2025.svg?style=for-the-badge
 [releases-shield]: https://img.shields.io/github/release/sennevds/media_player.template.svg?style=for-the-badge
 [releases]: https://github.com/sennevds/media_player.template/releases
