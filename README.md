@@ -33,6 +33,8 @@ Current implemented features:
 - current volume
 - set_volume action
 - play_media action (not tested)
+- app_id_template
+- app_name_template
 - media_content_type_template
 - media_image_url_template
 - media_image_url_remotely_accessible
@@ -120,6 +122,8 @@ media_player:
             value: "{{is_muted}}"
         current_is_muted_template: >
           {{ states('input_boolean.is_muted') }}
+        app_id_template: "{{ states('input_text.app_id') }}"
+        app_name_template: "{{ states('input_text.app_name') }}"
         album_art_template: "{{ states('input_text.album_art') }}"
         title_template: "{{ states('input_text.title') }}"
         album_template: "{{ states('input_text.album') }}"

@@ -45,6 +45,8 @@ LEGACY_FIELDS = {
     CONF_VALUE_TEMPLATE: CONF_STATE,
 }
 
+CONF_APP_ID_TEMPLATE = "app_id_template"
+CONF_APP_NAME_TEMPLATE = "app_name_template"
 CONF_ALBUM_ART_TEMPLATE = "album_art_template"
 CONF_ALBUM_TEMPLATE = "album_template"
 CONF_ARTIST_TEMPLATE = "artist_template"
@@ -84,6 +86,8 @@ MEDIA_PLAYER_SCHEMA = vol.Schema(
     {
         vol.Optional(ATTR_ENTITY_ID): cv.entity_ids,
         vol.Optional(ATTR_FRIENDLY_NAME): cv.template,
+        vol.Optional(CONF_APP_ID_TEMPLATE): cv.template,
+        vol.Optional(CONF_APP_NAME_TEMPLATE): cv.template,
         vol.Optional(CONF_ALBUM_ART_TEMPLATE): cv.template,
         vol.Optional(CONF_ALBUM_TEMPLATE): cv.template,
         vol.Optional(CONF_ARTIST_TEMPLATE): cv.template,
@@ -198,6 +202,8 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
 
         self._current_source_template = config.get(CONF_CURRENT_SOURCE_TEMPLATE)
         self._title_template = config.get(CONF_TITLE_TEMPLATE)
+        self._app_id_template = config.get(CONF_APP_ID_TEMPLATE)
+        self._app_name_template = config.get(CONF_APP_NAME_TEMPLATE)
         self._artist_template = config.get(CONF_ARTIST_TEMPLATE)
         self._album_template = config.get(CONF_ALBUM_TEMPLATE)
         self._current_volume_template = config.get(CONF_CURRENT_VOLUME_TEMPLATE)
@@ -243,6 +249,24 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
                 self._title_template,
                 None,
                 self._update_title,
+                none_on_template_error=True,
+            )
+
+        if self._app_id_template is not None:
+            self.add_template_attribute(
+                "_attr_app_id",
+                self._app_id_template,
+                None,
+                self._update_app_id,
+                none_on_template_error=True,
+            )
+
+        if self._app_name_template is not None:
+            self.add_template_attribute(
+                "_attr_app_name",
+                self._app_name_template,
+                None,
+                self._update_app_name,
                 none_on_template_error=True,
             )
 
@@ -430,6 +454,23 @@ class MediaPlayerTemplate(TemplateEntity, MediaPlayerEntity):
             return
 
         self._attr_media_title = vol.Coerce(str)(result)
+
+    @callback
+    def _update_app_id(self, result):
+        if isinstance(result, TemplateError) or result is None:
+            self._attr_app_id = None
+            return
+
+        self._attr_app_id = vol.Coerce(str)(result)
+
+
+    @callback
+    def _update_app_name(self, result):
+        if isinstance(result, TemplateError) or result is None:
+            self._attr_app_name = None
+            return
+
+        self._attr_app_name = vol.Coerce(str)(result)
 
     @callback
     def _update_media_artist(self, result):
